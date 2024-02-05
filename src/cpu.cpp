@@ -1,7 +1,7 @@
 #include "cpu.h"
 #include <cstdint>
 #include <cstring>
-
+#include <spdlog/spdlog.h>
 
 CPU::CPU(): pc(0) {
     memset(regs, 0, 32);
@@ -25,20 +25,18 @@ void CPU::execute(int inst){
     int rs2 = ((inst>>20))&0x1f;
     int funct3 = ((inst>>12))&0x7;
     int funct7 = ((inst>>25))&0x7f;
-
+    int imm = 0;
     switch(opcode){
-        case 0b0110011:  //add rd,rs1,rs2
+        case 0b0001011:   //addi rd,rs1,immediate
+            imm = (inst>>20);
+            regs[rd] = regs[rs1] + imm;
+            break;
+        case 0b0110011:     //add rd,rs1,rs2
             regs[rd] = regs[rs1] + regs[rs2];
-            break;
-        case 0x0010011:  //addi rd,rs1,immediate
-            int imm = (inst&0xfff00000);
-            regs[rd] = imm+regs[rs1];
-            break;
+            break; 
+
         default:
-            
+            spdlog::error("Unsupported instruction: 0x{:x}", inst);
             break;
     }
-
-
-    
 }

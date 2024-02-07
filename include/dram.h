@@ -12,7 +12,11 @@ public:
     template<BUS_VALID T>
     T load(u64 addr);
     template<BUS_VALID T>
+<<<<<<< HEAD
     T store(u64 addr,T data);
+=======
+    void store(u64 addr,T data);
+>>>>>>> e03168f (add test framework)
 private:
     u8* _dram;
 };

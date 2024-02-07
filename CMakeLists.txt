@@ -7,7 +7,11 @@ enable_testing()
 add_subdirectory(third_party/spdlog)
 
 include_directories(include)
-add_executable(gemu src/main.cpp src/cpu.cpp)
+add_executable(gemu src/main.cpp src/cpu.cpp
+        include/dram.cpp
+        src/bus.cpp
+
+)
 
 
 

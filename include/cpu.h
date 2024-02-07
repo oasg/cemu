@@ -1,28 +1,26 @@
 #ifndef HEADER_CPU
-#define HEADER_CPU 
-#include <memory>
-#define DRAM_SIZE 1024*1024*128
-
-const char* REG_NAME[] = {     
-    "zero", "ra", "sp", "gp", "tp", "t0", "t1", "t2", 
-    "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5", 
-    "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7", 
-    "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
+#define HEADER_CPU
+#include "bus.h"
 
 class CPU{
     public:
         CPU();
         ~CPU();
-
+        void run();
+        void step();
+        void load_program(const char* filename);
+        void dump_regs();
+        long* get_regs(){ return regs; }
+    private:
         //get instruction
         //The length of the instruction is 32 bits
-        int fetch();
-        //
-        void execute(int inst);
+        unsigned int fetch();
+        //execute instruction
+        void execute(unsigned int inst);
     private:
         //RISC-V has 32 registers
         long regs[32];
-        long pc;
+        unsigned long pc;
         char* dram;
 };
 

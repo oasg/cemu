@@ -4,13 +4,13 @@
 
 class CPU{
     public:
-        CPU();
+        explicit CPU(std::shared_ptr<Bus> bus);
         ~CPU();
         void run();
-        void step();
-        void load_program(const char* filename);
         void dump_regs();
-        long* get_regs(){ return regs; }
+        u64* get_regs(){ return regs; }
+        //execute one instruction
+        void step();
     private:
         //get instruction
         //The length of the instruction is 32 bits
@@ -19,9 +19,9 @@ class CPU{
         void execute(unsigned int inst);
     private:
         //RISC-V has 32 registers
-        long regs[32];
-        unsigned long pc;
-        char* dram;
+        u64 regs[32];
+        u64 pc;
+        std::shared_ptr<Bus> _bus;
 };
 
 #endif // !HEADER_CPU

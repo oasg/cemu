@@ -8,11 +8,16 @@ add_subdirectory(third_party/spdlog)
 
 include_directories(include)
 add_executable(gemu src/main.cpp src/cpu.cpp
-        include/dram.cpp
+        src/dram.cpp
         src/bus.cpp
 
-)
 
+)
+target_compile_definitions(gemu
+        PRIVATE
+        # If the debug configuration pass the DEBUG define to the compiler
+        $<$<CONFIG:Debug>:DEBUG>
+)
 
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

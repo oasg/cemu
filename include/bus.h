@@ -8,8 +8,22 @@
 class Bus {
 public:
     Bus();
-    u64 load(u64 addr,u64 size);
-    u64 store(u64 addr,u64 size);
+    template<typename T>
+    T load(u64 addr){
+        //address mapped from dram
+        if(addr>=DRAM_BASE && addr <= DRAM_END){
+            return _ram->load<T>(addr);
+        }
+        return 0;
+    }
+    template<BUS_VALID T>
+    void store(u64 addr,T data){
+        if(addr>=DRAM_BASE && addr <= DRAM_END){
+            return _ram->store<T>(addr,data);
+        }
+    }
+
+    void LoadProgram(const char* filename);
 private:
     std::shared_ptr<Dram> _ram;
 };

@@ -10,8 +10,10 @@ TEST(HelloTest, BasicAssertions) {
 }
 
 TEST(TestInst, ADD){
-    CPU cpu;
-    cpu.load_program("../../tests/add-addi.bin");
+    std::shared_ptr<Bus> bus = std::make_shared<Bus>();
+    bus->LoadProgram("../../tests/add-addi.bin");
+    CPU cpu(bus);
+    cpu.run();
     cpu.step();
     EXPECT_EQ(cpu.get_regs()[29], 0x5);
     cpu.step();

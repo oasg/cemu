@@ -7,17 +7,32 @@
 #include "type.h"
 class Dram {
 public:
-    Dram(u32 n_of_bytes);
+    Dram();
     ~Dram();
+    void load_program(const char* filename);
     template<BUS_VALID T>
-    T load(u64 addr);
+    inline T load(u64 addr){
+        {
+            u8 uBytes = sizeof(T);
+            T result = 0;
+            u64 index = (addr-DRAM_BASE);
+            for(int i = 0 ;i<uBytes;i++) {
+                result|= _dram[index+i]<<i*8;
+            }
+            return result;
+        }
+    }
     template<BUS_VALID T>
-<<<<<<< HEAD
-    T store(u64 addr,T data);
-=======
-    void store(u64 addr,T data);
->>>>>>> e03168f (add test framework)
+    void store(u64 addr, T data) {
+        u8 uBytes = sizeof(T)/8;
+        u64 index = (addr-DRAM_BASE);
+        for(int i = 0 ;i<uBytes;i++) {
+            _dram[index+i] = data>>i*8;
+        }
+    }
+
 private:
+
     u8* _dram;
 };
 

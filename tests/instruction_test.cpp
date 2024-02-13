@@ -21,7 +21,7 @@ TEST(TestInst, ADD){
     cpu.step();
     EXPECT_EQ(cpu.get_regs()[31], 0x2a);
 }
-
+//test r-type instruction
 TEST(TestInst, RTYPE){
     std::shared_ptr<Bus> bus = std::make_shared<Bus>();
     bus->LoadProgram("../../tests/r-type.bin");
@@ -45,5 +45,10 @@ TEST(TestInst, RTYPE){
     //and
     cpu.step();
     EXPECT_EQ(cpu.get_regs()[4], cpu.get_regs()[31] & cpu.get_regs()[29]);
+
+}
+//test load instruction
+TEST(TestInst, LOAD){
+
 
 }

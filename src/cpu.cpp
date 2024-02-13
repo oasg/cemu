@@ -95,14 +95,41 @@ void CPU::execute(unsigned int inst)
         }
 
         break;
-    case 0b0011011:
+    case 0b0010011:
+        funct3 = ((inst >> 12)) & 0x7;
         //I-type
         rd = ((inst >> 7)) & 0x1f;
-
-        // addiw rd,rs1,immediate
+        // addi rd,rs1,immediate
         imm = inst >> 20;
-        regs[rd] = regs[rs1] + imm;
         rs1 = ((inst >> 15)) & 0x1f;
+        switch (funct3) {
+            case 0x0: //addi
+                regs[rd] = regs[rs1] + imm;
+                break;
+            case 0x4:  //xori
+                regs[rd] = regs[rs1] ^ imm;
+                break;
+            case 0x6:  //ori
+                regs[rd] = regs[rs1] | imm;
+                break;
+            case 0x7:  //and
+                regs[rd] = regs[rs1] & imm;
+                break;
+            case 0x1:
+                regs[rd] = regs[rs1] << imm;
+                break;
+            case 0x5:
+                regs[rd] = regs[rs1] >> imm;
+                break;
+            case 0x2:
+                regs[rd] = (regs[rs1] < imm)?1:0;
+                break;
+            case 0x3:
+                regs[rd] = (regs[rs1] < imm)?1:0;
+            default:
+                spdlog::error("Unsupported instruction: 0x{:x}, opcode: 0d{:b}", inst, opcode);
+                break;
+        }
         break;
     case 0b0000011:
         //I-type 
@@ -131,14 +158,101 @@ void CPU::execute(unsigned int inst)
             break;
         default:
             spdlog::error("Unsupported instruction: 0x{:x}, opcode: 0d{:b}", inst, opcode);
-            break;  
-        break;
+            break;
         }
+        break;
     case 0b0100011:
         //store instructions
+        funct3 = ((inst >> 12)) & 0x7;
+        rs1 = ((inst >> 15)) & 0x1f;
+        rs2 = ((inst >> 20)) & 0x1f;
+        imm = inst >> 20;
+        switch (funct3) {
+            case 0x0:
+                _bus->store<u8>(rs1+imm,rs2);
+                break;
+            case 0x1:
+                _bus->store<u16>(rs1+imm,rs2);
+                break;
+            case 0x2:
+                _bus->store<u32>(rs1+imm,rs2);
+                break;
+            default:
+                spdlog::error("Unsupported instruction: 0x{:x}, opcode: 0d{:b}", inst, opcode);
+                break;
+        }
         break;
-    case 0b0000000: // nop
+    case 0b1100011:
+        //B-type
+        funct3 = ((inst >> 12)) & 0x7;
+        rs1 = ((inst >> 15)) & 0x1f;
+        rs2 = ((inst >> 20)) & 0x1f;
+        imm = inst >> 20;
+        switch (funct3) {
+            case 0x0:  //beq
+                if(rs1 == rs2) pc+=imm;
+                break;
+            case 0x1:  //bne
+                if(rs1 == rs2) pc+=imm;
+                break;
+            case 0x4:  //blt
+                if(rs1 < rs2) pc+=imm;
+                break;
+            case 0x5: //bge
+                if(rs1 >= rs2) pc+=imm;
+                break;
+            case 0x6: //bltu
+                if(rs1 < rs2) pc+=imm;
+                break;
+            case 0x7:  //bgeu
+                if(rs1 >= rs2) pc+=imm;
+                break;
+            default:
+                spdlog::error("Unsupported instruction: 0x{:x}, opcode: 0d{:b}", inst, opcode);
+                break;
+        }
+    case 0b1101111:
+        //jal
+        //jump and link
+        rd = ((inst >> 7)) & 0x1f;
+        imm = inst >> 20;
+        regs[rd] = pc+4;
+        pc+= imm;
         break;
+    case 0b1100111:
+        //jalr
+        //jump and link reg
+        rd = ((inst >> 7)) & 0x1f;
+        rs1 = ((inst >> 15)) & 0x1f;
+        imm = inst >> 20;
+        regs[rd] = pc+4;
+        pc+=rs1+imm;
+        break;
+    case 0b0110111:
+        //lui
+        //Load upper imm
+        rd = ((inst >> 7)) & 0x1f;
+        imm = inst >> 20;
+        regs[rd] = imm << 12;
+        break;
+    case 0b0010111:
+        //auipc
+        rd = ((inst >> 7)) & 0x1f;
+        imm = inst >> 20;
+        regs[rd] = pc + (imm << 12);
+        break;
+    case 0b1110011:
+        imm = inst >> 20;
+        if(imm == 0x0){
+            spdlog::error("Unsupported instruction ecall: 0x{:x}, opcode: 0d{:b}", inst, opcode);
+        }
+        if(imm == 0x1){
+            spdlog::error("Unsupported instruction ebreak: 0x{:x}, opcode: 0d{:b}", inst, opcode);
+        }
+        break;
+    case 0b0000000: // no
+        break;
+
     default:
         spdlog::error("Unsupported instruction: 0x{:x}, opcode: 0d{:b}", inst, opcode);
         break;
